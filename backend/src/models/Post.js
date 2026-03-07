@@ -1,0 +1,82 @@
+'use strict';
+
+const { DataTypes } = require('sequelize');
+
+/**
+ * Define the Post model.
+ * @param {import('sequelize').Sequelize} sequelize
+ */
+function definePost(sequelize) {
+  const Post = sequelize.define('Post', {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    userId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: { model: 'users', key: 'id' },
+    },
+    subject: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    style: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    postText: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    imageUrls: {
+      type: DataTypes.JSONB,
+      defaultValue: [],
+    },
+    hashtags: {
+      type: DataTypes.JSONB,
+      defaultValue: [],
+    },
+    status: {
+      type: DataTypes.ENUM('draft', 'scheduled', 'published', 'failed'),
+      defaultValue: 'draft',
+    },
+    scheduledAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    publishedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    threadPostId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    errorMessage: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    maxPosts: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1,
+    },
+    followUpEnabled: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+  }, {
+    tableName: 'posts',
+    timestamps: true,
+  });
+
+  Post.associate = (models) => {
+    Post.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
+    Post.hasMany(models.ScheduledJob, { foreignKey: 'postId', as: 'scheduledJobs' });
+  };
+
+  return Post;
+}
+
+module.exports = { definePost };
