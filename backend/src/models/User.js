@@ -59,8 +59,9 @@ function defineUser(sequelize) {
         if (!raw) return null;
         try {
           return decrypt(raw);
-        } catch {
-          return raw;
+        } catch (err) {
+          console.error('[User] Failed to decrypt accessToken — possible key mismatch or data corruption:', err.message);
+          return null;
         }
       },
       set(value) {

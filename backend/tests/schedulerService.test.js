@@ -79,8 +79,7 @@ describe('schedulePost', () => {
   test('returns null when queue is not initialized', async () => {
     // Queue is not initialized because initQueue was not called
     const result = await schedulerService.schedulePost('post-123', new Date(Date.now() + 60000));
-    // Either null (no queue) or a job id
-    expect(result === null || typeof result === 'object').toBe(true);
+    expect(result).toBeNull();
   });
 });
 

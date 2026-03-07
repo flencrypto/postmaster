@@ -7,8 +7,8 @@ const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   databaseUrl: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/threadoptimizer',
   redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
-  jwtSecret: process.env.JWT_SECRET || 'changeme-jwt-secret',
-  encryptionKey: process.env.ENCRYPTION_KEY || 'changeme-32-char-encryption-key!',
+  jwtSecret: process.env.JWT_SECRET || '',
+  encryptionKey: process.env.ENCRYPTION_KEY || '',
   meta: {
     appId: process.env.META_APP_ID || '',
     appSecret: process.env.META_APP_SECRET || '',
