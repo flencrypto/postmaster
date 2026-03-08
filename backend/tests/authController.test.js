@@ -109,7 +109,8 @@ describe('handleCallback', () => {
   // ── error path: provider returned an error ──────────────────────────────
 
   test('sends oauth_error postMessage when provider returns error param', async () => {
-    const req = mockReq({ error: 'access_denied', error_description: 'User denied' });
+    const state = makeValidState();
+    const req = mockReq({ error: 'access_denied', error_description: 'User denied', state });
     const res = mockRes();
 
     await authController.handleCallback(req, res);
@@ -120,6 +121,18 @@ describe('handleCallback', () => {
     // Must be an HTML page, not raw JSON
     expect(res._body).toContain('<!DOCTYPE html>');
     expect(res._body).toContain('postMessage');
+  });
+
+  test('sends CSRF error postMessage when provider returns error param with missing state', async () => {
+    const req = mockReq({ error: 'access_denied', error_description: 'User denied' }); // no state
+    const res = mockRes();
+
+    await authController.handleCallback(req, res);
+
+    expect(res._status).toBe(400);
+    expect(res._body).toContain('oauth_error');
+    expect(res._body).toContain('Invalid state parameter');
+    expect(res._body).toContain('<!DOCTYPE html>');
   });
 
   // ── error path: missing code ─────────────────────────────────────────────
@@ -212,7 +225,8 @@ describe('handleCallback', () => {
   // ── postMessage uses configured targetOrigin ──────────────────────────────
 
   test('postMessage targets the configured FRONTEND_URL', async () => {
-    const req = mockReq({ error: 'access_denied' });
+    const state = makeValidState();
+    const req = mockReq({ error: 'access_denied', state });
     const res = mockRes();
 
     await authController.handleCallback(req, res);
@@ -231,6 +245,7 @@ describe('logout', () => {
 
     await authController.logout(req, res);
 
+    expect(res._status).toBe(200);
     expect(res._body).toEqual({ message: 'Logged out successfully' });
   });
 });

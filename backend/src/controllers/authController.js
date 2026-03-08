@@ -109,6 +109,13 @@ async function handleCallback(req, res) {
   const { code, state, error, error_description } = req.query;
   const targetOrigin = config.frontendUrl || 'http://localhost:3000';
 
+  // Verify CSRF state first — applies to all callback paths including provider errors
+  // (RFC 9700 §4.7: state must be validated even when the AS returns an error)
+  if (!verifyState(state)) {
+    return res
+      .status(400)
+      .send(buildPostMessageHtml({ type: 'oauth_error', error: 'Invalid state parameter' }, targetOrigin));
+  }
   if (error) {
     return res
       .status(400)
@@ -118,11 +125,6 @@ async function handleCallback(req, res) {
     return res
       .status(400)
       .send(buildPostMessageHtml({ type: 'oauth_error', error: 'No authorization code provided' }, targetOrigin));
-  }
-  if (!verifyState(state)) {
-    return res
-      .status(400)
-      .send(buildPostMessageHtml({ type: 'oauth_error', error: 'Invalid state parameter' }, targetOrigin));
   }
 
   try {
