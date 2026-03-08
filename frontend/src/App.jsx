@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import Dashboard from './components/Dashboard/Dashboard.jsx'
 import LoginButton from './components/Auth/LoginButton.jsx'
-import { getProfile } from './services/api.js'
+import { getProfile, logoutUser } from './services/api.js'
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -44,6 +44,7 @@ export default function App() {
   }
 
   const handleLogout = () => {
+    logoutUser().catch(() => {/* server-side logout is best-effort */})
     localStorage.removeItem('auth_token')
     localStorage.removeItem('user')
     setUser(null)
