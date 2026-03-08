@@ -40,10 +40,10 @@ async function apiCallWithRetry(fn, retries = MAX_RETRIES) {
  * Create a Threads media container.
  * @param {string} userId - Threads user ID
  * @param {string} accessToken - Valid access token
- * @param {{ text: string, imageUrl?: string, mediaType?: string }} postData
+ * @param {{ text: string, imageUrl?: string, videoUrl?: string, mediaType?: string, replyToId?: string }} postData
  * @returns {Promise<{ id: string }>}
  */
-async function createMediaContainer(userId, accessToken, { text, imageUrl, mediaType = 'TEXT' }) {
+async function createMediaContainer(userId, accessToken, { text, imageUrl, videoUrl, mediaType = 'TEXT', replyToId }) {
   return apiCallWithRetry(async () => {
     const params = {
       media_type: mediaType,
@@ -53,6 +53,13 @@ async function createMediaContainer(userId, accessToken, { text, imageUrl, media
     if (imageUrl) {
       params.image_url = imageUrl;
       params.media_type = 'IMAGE';
+    }
+    if (videoUrl) {
+      params.video_url = videoUrl;
+      params.media_type = 'VIDEO';
+    }
+    if (replyToId) {
+      params.reply_to_id = replyToId;
     }
 
     const response = await axios.post(`${BASE_URL}/${userId}/threads`, null, { params });
@@ -83,7 +90,7 @@ async function publishContainer(userId, accessToken, containerId) {
  * Create and publish a single Threads post.
  * @param {string} userId
  * @param {string} accessToken
- * @param {{ text: string, imageUrl?: string }} postData
+ * @param {{ text: string, imageUrl?: string, videoUrl?: string }} postData
  * @returns {Promise<{ containerId: string, postId: string }>}
  */
 async function createThreadPost(userId, accessToken, postData) {
@@ -92,6 +99,18 @@ async function createThreadPost(userId, accessToken, postData) {
   await sleep(500);
   const published = await publishContainer(userId, accessToken, container.id);
   return { containerId: container.id, postId: published.id };
+}
+
+/**
+ * Create and publish a video post on Threads.
+ * @param {string} userId
+ * @param {string} accessToken
+ * @param {{ text: string, videoUrl: string }} postData
+ * @returns {Promise<{ containerId: string, postId: string }>}
+ */
+async function createVideoPost(userId, accessToken, postData) {
+  if (!postData.videoUrl) throw new Error('videoUrl is required for video posts');
+  return createThreadPost(userId, accessToken, { ...postData, mediaType: 'VIDEO' });
 }
 
 /**
@@ -160,6 +179,7 @@ module.exports = {
   createMediaContainer,
   publishContainer,
   createThreadPost,
+  createVideoPost,
   createThreadChain,
   refreshToken,
   getUserProfile,

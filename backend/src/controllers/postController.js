@@ -176,6 +176,7 @@ async function approvePost(req, res) {
 
 /**
  * Immediately publish a post via Threads API.
+ * Uses VIDEO media type when the post has a videoUrl attached.
  */
 async function publishNow(req, res) {
   try {
@@ -186,10 +187,17 @@ async function publishNow(req, res) {
     const user = await User.findByPk(req.user.userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
+    // Choose media type based on whether a video URL is present
+    const postData = { text: post.postText };
+    if (post.videoEnabled && post.videoUrl) {
+      postData.videoUrl = post.videoUrl;
+      postData.mediaType = 'VIDEO';
+    }
+
     const result = await threadsService.createThreadPost(
       user.threadsUserId,
       user.accessToken,
-      { text: post.postText }
+      postData
     );
 
     await post.update({ status: 'published', publishedAt: new Date(), threadPostId: result.postId });

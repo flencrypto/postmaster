@@ -24,6 +24,24 @@ const PROMPT_TEMPLATES = {
   sarcastic_shoutout: `Pen a dripping-with-sarcasm 'congrats' Threads post on "{{SUBJECT}}". Tone: {{STYLE}} + fake enthusiasm that flips to mockery. Opener pretends to applaud then guts it. Close with mocking question. 2–3 snarky hashtags. Suggest ironic visuals. Output: POST TEXT: [...]\nIMAGE SUGGESTIONS: [...]`,
 
   sarcastic_personal: `Drop a raw, sarcasm-overloaded behind-the-scenes Threads post from a burned-out DC/infra vet on "{{SUBJECT}}". Tone: {{STYLE}} + conversational max snark. Hook: 'Real talk...' energy. Share mocking observation. Reply driver. 2–4 hashtags. Suggest gritty-sarcastic visuals. Output: POST TEXT: [...]\nIMAGE SUGGESTIONS: [...]`,
+
+  // Video script generation — produces structured scene descriptions for AI video tools
+  video_script: `Generate a {{DURATION}}-second vertical 9:16 video script for Threads on "{{SUBJECT}}".
+Tone: {{STYLE}}.
+Structure:
+- 0–3s: Hook — bold text overlay + strong visual (attention-grabbing opening)
+- 3–{{MID_POINT}}s: Key points with transitions, text pops, fast cuts (80%+ sound-off friendly)
+- {{MID_POINT}}–{{DURATION}}s: Polarizing CTA question + freeze-frame or outro
+Style: fast cuts, bold captions, optional sarcastic voiceover, native vertical format.
+Output:
+VIDEO SCRIPT:
+[Scene-by-scene description]
+VOICEOVER SCRIPT:
+[Optional spoken script]
+CAPTION TEXT:
+[Bold on-screen text, one per scene]
+VIDEO HOOK:
+[First 1-3 second attention grabber]`,
 };
 
 /**
@@ -126,9 +144,14 @@ async function generateContent(subject, style, templateType = 'basic_insight', o
     throw new Error(`Unknown template type: ${templateType}`);
   }
 
+  const duration = options.duration || 30;
+  const midPoint = Math.round(duration * 0.65);
+
   const prompt = template
     .replace(/\{\{SUBJECT\}\}/g, subject)
-    .replace(/\{\{STYLE\}\}/g, style || 'professional, data-center insider');
+    .replace(/\{\{STYLE\}\}/g, style || 'professional, data-center insider')
+    .replace(/\{\{DURATION\}\}/g, duration)
+    .replace(/\{\{MID_POINT\}\}/g, midPoint);
 
   const response = await axios.post(
     config.xai.apiUrl,

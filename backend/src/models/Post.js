@@ -66,6 +66,43 @@ function definePost(sequelize) {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    // Video fields
+    videoEnabled: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    videoUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    videoDuration: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      comment: 'Target video duration in seconds (15–90)',
+    },
+    voiceoverEnabled: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    voiceoverStyle: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      comment: 'TTS voice style: sarcastic_male | sarcastic_female | professional_male | professional_female',
+    },
+    captionsEnabled: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
+    videoScript: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      comment: 'Grok-generated video script / scene descriptions',
+    },
+    videoProvider: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      comment: 'AI video provider used: runway | pika | kling | luma | placeholder',
+    },
   }, {
     tableName: 'posts',
     timestamps: true,

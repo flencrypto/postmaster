@@ -46,7 +46,7 @@ describe('parseGrokResponse', () => {
     const expectedTypes = [
       'basic_insight', 'question_poll', 'short_thread', 'shoutout', 'personal',
       'sarcastic_hot_take', 'sarcastic_question', 'sarcastic_thread',
-      'sarcastic_shoutout', 'sarcastic_personal',
+      'sarcastic_shoutout', 'sarcastic_personal', 'video_script',
     ];
     expectedTypes.forEach(type => {
       expect(PROMPT_TEMPLATES).toHaveProperty(type);
@@ -55,6 +55,7 @@ describe('parseGrokResponse', () => {
   });
 
   test('prompt templates contain SUBJECT and STYLE placeholders', () => {
+    // video_script also has DURATION/MID_POINT — check the rest for SUBJECT/STYLE
     Object.entries(PROMPT_TEMPLATES).forEach(([key, template]) => {
       expect(template).toContain('{{SUBJECT}}');
       expect(template).toContain('{{STYLE}}');

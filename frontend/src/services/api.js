@@ -27,6 +27,12 @@ api.interceptors.response.use(
 export const generateContent = ({ subject, style, templateType }) =>
   api.post('/grok/generate', { subject, style, templateType })
 
+export const generateVideoScript = ({ subject, style, duration }) =>
+  api.post('/video/preview', { subject, style, duration })
+
+export const generateVideoForPost = (id, options) =>
+  api.post(`/video/posts/${id}/generate`, options)
+
 export const createAndSchedulePost = (data) =>
   api.post('/posts/generate', data)
 

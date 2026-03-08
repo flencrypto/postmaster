@@ -29,6 +29,18 @@ const config = {
     morning: { start: '08:00', end: '11:00' },
     afternoon: { start: '16:00', end: '19:00' },
   },
+  video: {
+    // AI video generation provider: 'runway' | 'pika' | 'kling' | 'luma'
+    defaultProvider: process.env.VIDEO_GEN_PROVIDER || 'runway',
+    apiKey: process.env.RUNWAY_API_KEY || process.env.PIKA_API_KEY || process.env.KLING_API_KEY || process.env.LUMA_API_KEY || '',
+    elevenLabsApiKey: process.env.ELEVENLABS_API_KEY || '',
+    defaultDuration: parseInt(process.env.VIDEO_DEFAULT_DURATION, 10) || 30,
+    maxDuration: 90,
+    minDuration: 15,
+    // Preferred aspect ratio for Threads (vertical)
+    aspectRatio: '9:16',
+    resolution: '1080x1920',
+  },
 };
 
 // Fail fast in production if critical secrets are not set

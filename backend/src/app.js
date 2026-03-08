@@ -9,6 +9,7 @@ const rateLimiter = require('./middleware/rateLimiter');
 const authRoutes = require('./routes/auth');
 const postRoutes = require('./routes/posts');
 const grokRoutes = require('./routes/grok');
+const videoRoutes = require('./routes/video');
 const schedulerService = require('./services/schedulerService');
 
 const app = express();
@@ -35,6 +36,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/grok', grokRoutes);
+app.use('/api/video', videoRoutes);
 
 // 404 handler
 app.use((req, res) => {
