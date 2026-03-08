@@ -1,0 +1,11 @@
+node_modules/
+*.env
+.env.local
+.env.production
+dist/
+build/
+*.log
+frontend/dist/
+frontend/.vite/
+coverage/
+tmp/
