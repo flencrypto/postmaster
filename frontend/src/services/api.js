@@ -48,4 +48,7 @@ export const publishNow = (id) =>
 export const getProfile = () =>
   api.get('/auth/profile')
 
+export const logoutUser = () =>
+  api.post('/auth/logout')
+
 export default api
