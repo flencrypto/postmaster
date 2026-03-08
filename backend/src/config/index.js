@@ -32,7 +32,11 @@ const config = {
   video: {
     // AI video generation provider: 'runway' | 'pika' | 'kling' | 'luma'
     defaultProvider: process.env.VIDEO_GEN_PROVIDER || 'runway',
-    apiKey: process.env.RUNWAY_API_KEY || process.env.PIKA_API_KEY || process.env.KLING_API_KEY || process.env.LUMA_API_KEY || '',
+    // Per-provider API keys — each provider uses its own key
+    runwayApiKey: process.env.RUNWAY_API_KEY || '',
+    pikaApiKey: process.env.PIKA_API_KEY || '',
+    klingApiKey: process.env.KLING_API_KEY || '',
+    lumaApiKey: process.env.LUMA_API_KEY || '',
     elevenLabsApiKey: process.env.ELEVENLABS_API_KEY || '',
     defaultDuration: parseInt(process.env.VIDEO_DEFAULT_DURATION, 10) || 30,
     maxDuration: 90,

@@ -104,6 +104,45 @@ describe('threadsService', () => {
     });
   });
 
+  describe('createThreadChain', () => {
+    test('sends replyToId (camelCase) for each post after the first', async () => {
+      // First post: container + publish
+      axios.post
+        .mockResolvedValueOnce({ data: { id: 'container-1' } })  // createMediaContainer post 1
+        .mockResolvedValueOnce({ data: { id: 'post-1' } })       // publishContainer post 1
+        .mockResolvedValueOnce({ data: { id: 'container-2' } })  // createMediaContainer post 2
+        .mockResolvedValueOnce({ data: { id: 'post-2' } });      // publishContainer post 2
+
+      const posts = [
+        { text: 'First post in thread' },
+        { text: 'Reply to first post' },
+      ];
+
+      const results = await threadsService.createThreadChain('user-1', 'tok', posts);
+
+      expect(results).toHaveLength(2);
+      expect(results[0].postId).toBe('post-1');
+      expect(results[1].postId).toBe('post-2');
+
+      // The second createMediaContainer call must include reply_to_id (the published id of post 1)
+      const secondContainerCall = axios.post.mock.calls[2]; // index 2 = 3rd call
+      const secondParams = secondContainerCall[2].params;
+      expect(secondParams.reply_to_id).toBe('post-1');
+    });
+
+    test('first post in chain has no reply_to_id', async () => {
+      axios.post
+        .mockResolvedValueOnce({ data: { id: 'container-a' } })
+        .mockResolvedValueOnce({ data: { id: 'post-a' } });
+
+      await threadsService.createThreadChain('user-1', 'tok', [{ text: 'Solo post' }]);
+
+      const firstContainerCall = axios.post.mock.calls[0];
+      const firstParams = firstContainerCall[2].params;
+      expect(firstParams.reply_to_id).toBeUndefined();
+    });
+  });
+
   describe('getUserProfile', () => {
     test('fetches user profile from /me endpoint', async () => {
       const mockProfile = { id: 'threads-user-1', username: 'testuser', threads_profile_picture_url: 'https://pic.url' };

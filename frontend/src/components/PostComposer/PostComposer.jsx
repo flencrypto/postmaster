@@ -147,19 +147,30 @@ export default function PostComposer() {
     setSuccess('')
     setIsScheduling(true)
     try {
+      // Map frontend field names to the backend contract
       const payload = {
-        ...formData,
+        subject: formData.subject,
+        style: formData.style,
+        templateType: formData.templateType,
+        maxPosts: formData.maxPosts,
+        followUpEnabled: formData.extendedThreads,
+        videoEnabled: formData.videoEnabled,
+        videoDuration: formData.videoDuration,
+        voiceoverEnabled: formData.voiceoverEnabled,
+        voiceoverStyle: formData.voiceoverStyle,
+        captionsEnabled: formData.captionsEnabled,
+        videoProvider: formData.videoProvider,
         generatedContent: preview || null,
       }
       const res = await createAndSchedulePost(payload)
-      const scheduledAt = res.data?.scheduled_at
-        ? new Date(res.data.scheduled_at).toLocaleString()
+      const scheduledAt = res.data?.scheduledAt
+        ? new Date(res.data.scheduledAt).toLocaleString()
         : 'the next available window'
       setSuccess(`Post scheduled for ${scheduledAt}!`)
       setPreview(null)
       setFormData(DEFAULT_FORM)
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to schedule post. Please try again.')
+      setError(err.response?.data?.message || err.response?.data?.error || 'Failed to schedule post. Please try again.')
     } finally {
       setIsScheduling(false)
     }
@@ -485,7 +496,7 @@ export default function PostComposer() {
           <div className="preview-card card">
             <div className="preview-header">
               <span className="preview-title">Generated Content</span>
-              {preview.thread_potential && (
+              {preview.threadPotential && (
                 <span className="badge badge-scheduled">🧵 Thread Potential</span>
               )}
             </div>
@@ -494,45 +505,48 @@ export default function PostComposer() {
               {preview.postText || 'No text returned.'}
             </blockquote>
 
-            {isThreadTemplate && preview.thread_posts && preview.thread_posts.length > 0 && (
+            {isThreadTemplate && preview.threadPosts && preview.threadPosts.length > 0 && (
               <div className="thread-posts-list">
                 <p className="thread-posts-label">Thread Posts:</p>
-                {preview.thread_posts.map((post, i) => (
-                  <div key={i} className="thread-post-item">
-                    <span className="thread-post-num">{i + 1}</span>
-                    <span>{post}</span>
-                  </div>
-                ))}
+                {preview.threadPosts.map((post, i) => {
+                  const postText = typeof post === 'string' ? post : (post?.text || post?.content || JSON.stringify(post))
+                  return (
+                    <div key={i} className="thread-post-item">
+                      <span className="thread-post-num">{i + 1}</span>
+                      <span>{postText}</span>
+                    </div>
+                  )
+                })}
               </div>
             )}
 
-            {preview.image_suggestions && preview.image_suggestions.length > 0 && (
+            {preview.imageSuggestions && preview.imageSuggestions.length > 0 && (
               <div className="preview-meta">
                 <p className="preview-meta-label">🖼️ Image Suggestions:</p>
                 <ul className="preview-list">
-                  {preview.image_suggestions.map((img, i) => (
+                  {preview.imageSuggestions.map((img, i) => (
                     <li key={i}>{img}</li>
                   ))}
                 </ul>
               </div>
             )}
 
-            {preview.poll_options && preview.poll_options.length > 0 && (
+            {preview.pollOptions && preview.pollOptions.length > 0 && (
               <div className="preview-meta">
                 <p className="preview-meta-label">📊 Poll Options:</p>
                 <ul className="preview-list preview-list--poll">
-                  {preview.poll_options.map((opt, i) => (
+                  {preview.pollOptions.map((opt, i) => (
                     <li key={i}>{opt}</li>
                   ))}
                 </ul>
               </div>
             )}
 
-            {preview.followup_ideas && preview.followup_ideas.length > 0 && (
+            {preview.followUpIdeas && preview.followUpIdeas.length > 0 && (
               <div className="preview-meta">
                 <p className="preview-meta-label">💡 Follow-up Ideas:</p>
                 <ul className="preview-list">
-                  {preview.followup_ideas.map((idea, i) => (
+                  {preview.followUpIdeas.map((idea, i) => (
                     <li key={i}>{idea}</li>
                   ))}
                 </ul>

@@ -4,23 +4,21 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: threadoptimizer
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-    ports:
-      - '5432:5432'
+      POSTGRES_DB: ${POSTGRES_DB:-threadoptimizer}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Required environment variable not set}
+    # DB port is NOT published to the host — only accessible to backend within the compose network
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres}']
       interval: 10s
       timeout: 5s
       retries: 5
 
   redis:
     image: redis:7-alpine
-    ports:
-      - '6379:6379'
+    # Redis port is NOT published to the host — only accessible within the compose network
     volumes:
       - redis_data:/data
     healthcheck:
@@ -38,16 +36,22 @@ services:
     environment:
       PORT: 3001
       NODE_ENV: development
-      DATABASE_URL: postgresql://postgres:password@postgres:5432/threadoptimizer
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:?Required environment variable not set}@postgres:5432/${POSTGRES_DB:-threadoptimizer}
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      JWT_SECRET: ${JWT_SECRET:?Required environment variable not set}
       META_APP_ID: ${META_APP_ID}
       META_APP_SECRET: ${META_APP_SECRET}
       META_REDIRECT_URI: ${META_REDIRECT_URI:-http://localhost:3001/api/auth/threads/callback}
       XAI_API_KEY: ${XAI_API_KEY}
       UNSPLASH_ACCESS_KEY: ${UNSPLASH_ACCESS_KEY}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-change-me-32-chars-in-production!}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?Required environment variable not set}
+      VIDEO_GEN_PROVIDER: ${VIDEO_GEN_PROVIDER:-runway}
+      RUNWAY_API_KEY: ${RUNWAY_API_KEY:-}
+      PIKA_API_KEY: ${PIKA_API_KEY:-}
+      KLING_API_KEY: ${KLING_API_KEY:-}
+      LUMA_API_KEY: ${LUMA_API_KEY:-}
+      ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
     depends_on:
       postgres:
         condition: service_healthy

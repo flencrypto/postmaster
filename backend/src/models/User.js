@@ -4,7 +4,7 @@ const { DataTypes } = require('sequelize');
 const crypto = require('crypto');
 const config = require('../config');
 
-// Encrypt/decrypt access tokens using AES-256-CBC
+// Encrypt/decrypt access tokens using AES-256-GCM (authenticated encryption)
 function getEncryptionKey() {
   const key = config.encryptionKey;
   if (!key || key.length < 32) {
@@ -19,18 +19,26 @@ function getEncryptionKey() {
 
 function encrypt(text) {
   const key = getEncryptionKey();
-  const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+  const iv = crypto.randomBytes(12); // GCM standard: 12-byte IV
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
   const encrypted = Buffer.concat([cipher.update(text, 'utf8'), cipher.final()]);
-  return iv.toString('hex') + ':' + encrypted.toString('hex');
+  const authTag = cipher.getAuthTag();
+  // Format: iv(hex):authTag(hex):ciphertext(hex)
+  return iv.toString('hex') + ':' + authTag.toString('hex') + ':' + encrypted.toString('hex');
 }
 
 function decrypt(encryptedText) {
-  const [ivHex, encHex] = encryptedText.split(':');
+  const parts = encryptedText.split(':');
+  if (parts.length !== 3) {
+    throw new Error('Invalid encrypted token format');
+  }
+  const [ivHex, authTagHex, encHex] = parts;
   const key = getEncryptionKey();
   const iv = Buffer.from(ivHex, 'hex');
+  const authTag = Buffer.from(authTagHex, 'hex');
   const encrypted = Buffer.from(encHex, 'hex');
-  const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+  const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+  decipher.setAuthTag(authTag);
   return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString('utf8');
 }
 

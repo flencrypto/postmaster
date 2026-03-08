@@ -127,7 +127,7 @@ async function createThreadChain(userId, accessToken, posts) {
   for (const post of posts) {
     const postData = { ...post };
     if (replyToId) {
-      postData.reply_to_id = replyToId;
+      postData.replyToId = replyToId;
     }
 
     const container = await createMediaContainer(userId, accessToken, postData);

@@ -125,7 +125,14 @@ async function createVideoFromScript(scriptData, options = {}) {
     resolution = '1080x1920',
   } = options;
 
-  const apiKey = options.apiKey || config.video.apiKey;
+  // Select the API key for the chosen provider; allow override via options
+  const providerKeyMap = {
+    runway: config.video.runwayApiKey,
+    pika: config.video.pikaApiKey,
+    kling: config.video.klingApiKey,
+    luma: config.video.lumaApiKey,
+  };
+  const apiKey = options.apiKey || providerKeyMap[provider] || '';
 
   if (!apiKey) {
     console.warn(`[VideoService] No API key for provider "${provider}". Returning placeholder.`);

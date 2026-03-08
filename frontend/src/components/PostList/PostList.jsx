@@ -127,22 +127,25 @@ export default function PostList() {
                     <span className={`badge ${statusCfg.className}`}>
                       {statusCfg.label}
                     </span>
-                    {post.image_count > 0 && (
+                    {post.imageUrls && post.imageUrls.length > 0 && (
                       <span className="post-image-badge">
-                        🖼️ {post.image_count}
+                        🖼️ {post.imageUrls.length}
                       </span>
+                    )}
+                    {post.videoEnabled && post.videoUrl && (
+                      <span className="post-video-badge">🎬 Video</span>
                     )}
                     <span className="post-item-time">
                       {post.status === 'published'
-                        ? `Published ${formatDate(post.published_at)}`
-                        : post.scheduled_at
-                        ? `Scheduled ${formatDate(post.scheduled_at)}`
+                        ? `Published ${formatDate(post.publishedAt)}`
+                        : post.scheduledAt
+                        ? `Scheduled ${formatDate(post.scheduledAt)}`
                         : 'Unscheduled'}
                     </span>
                   </div>
 
                   <p className="post-item-text">
-                    {truncate(post.text || post.content)}
+                    {truncate(post.postText || '')}
                   </p>
 
                   <div className="post-item-actions">

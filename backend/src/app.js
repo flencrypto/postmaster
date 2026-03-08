@@ -49,11 +49,13 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
 });
 
-// Initialize scheduler (non-blocking)
+// Initialize scheduler queue (non-blocking — Redis unavailable is handled gracefully)
 schedulerService.initQueue();
 
-// Start server only when run directly (not imported in tests)
+// Start server and scheduler worker only when run directly (not imported in tests)
 if (require.main === module) {
+  // Start BullMQ worker so scheduled jobs are processed in this process
+  schedulerService.startWorker();
   app.listen(config.port, () => {
     console.log(`[App] ThreadOptimizer backend running on port ${config.port} (${config.nodeEnv})`);
   });

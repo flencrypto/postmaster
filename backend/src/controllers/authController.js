@@ -99,7 +99,43 @@ async function handleCallback(req, res) {
       { expiresIn: '7d' }
     );
 
-    return res.json({ token: jwtToken, user: { id: user.id, username: profile.username, profilePic: profile.threads_profile_picture_url } });
+    // Respond with an HTML page that notifies the opener window (popup flow).
+    // JSON.stringify handles most special characters; additionally escape <, >, & to prevent
+    // any script injection if this page is ever rendered outside the intended context.
+    const payload = {
+      type: 'oauth_success',
+      token: jwtToken,
+      user: {
+        id: user.id,
+        username: profile.username,
+        profilePic: profile.threads_profile_picture_url,
+      },
+    };
+    const serializedPayload = JSON.stringify(payload)
+      .replace(/</g, '\\u003c')
+      .replace(/>/g, '\\u003e')
+      .replace(/&/g, '\\u0026');
+
+    // Use the configured frontend URL as targetOrigin to prevent token leakage to other origins.
+    const targetOrigin = config.frontendUrl || 'http://localhost:3000';
+
+    return res.status(200).send(`<!DOCTYPE html>
+<html>
+  <head><meta charset="utf-8" /><title>Authentication Successful</title></head>
+  <body>
+    <script>
+      (function () {
+        var data = ${serializedPayload};
+        try {
+          if (window.opener && !window.opener.closed) {
+            window.opener.postMessage(data, ${JSON.stringify(targetOrigin)});
+          }
+        } catch (e) { /* ignore postMessage errors */ }
+        window.close();
+      })();
+    </script>
+  </body>
+</html>`);
   } catch (err) {
     console.error('[Auth] OAuth callback error:', err.message);
     return res.status(500).json({ error: 'OAuth authentication failed', details: err.message });

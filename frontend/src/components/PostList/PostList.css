@@ -79,6 +79,15 @@
   border: 1px solid var(--border-color);
 }
 
+.post-video-badge {
+  font-size: 0.75rem;
+  color: #c084fc;
+  background: rgba(124, 58, 237, 0.12);
+  padding: 0.15rem 0.5rem;
+  border-radius: 20px;
+  border: 1px solid rgba(124, 58, 237, 0.3);
+}
+
 /* ---- Post text ---- */
 .post-item-text {
   font-size: 0.9rem;
