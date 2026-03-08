@@ -11,10 +11,11 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
-COPY --from=deps /app/node_modules ./node_modules
-COPY src ./src
-COPY package*.json ./
+COPY --chown=node:node --from=deps /app/node_modules ./node_modules
+COPY --chown=node:node src ./src
+COPY --chown=node:node package*.json ./
 
+USER node
 EXPOSE 3001
 
 CMD ["npm", "start"]
